@@ -31,7 +31,7 @@
         {% for answer in question.answers %}
             <li>
                 <div class="user-info">
-                    <img class="avatar" src="{{ url_for('static',filename='images/zhiliao.png') }}" alt="">
+                    <img class="avatar" src="{{ url_for('static',filename='images/logo_100x100.png') }}" alt="">
                     <span class="username">{{ answer.author.username }}</span>
                     <span class="create-time">{{ answer.create_time }}</span>
                 </div>

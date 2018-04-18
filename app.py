@@ -8,6 +8,9 @@ from forms import RegistForm
 from models import UserModel,QuestionModel,AnswerModel
 from decorators import login_required
 from sqlalchemy import or_
+import json,requests
+import os
+import urllib
 
 app = Flask(__name__)
 app.config.from_object(config)
@@ -35,9 +38,57 @@ def question():
         db.session.commit()
         return flask.redirect(flask.url_for('index'))
 
+def autoRobotAnswer(id, question_model):
+    pid = os.fork()
+    if pid != 0:
+        return
+    url = "http://47.104.98.154:8080/anonymous/wordManage/wenda"
+    headers = {'content-type': "application/json"}
+    query_string = {"question": question_model.title, "robotid": "1791"}
+
+    if (len(question_model.answers) < 1):
+
+        response = requests.post(url, data=json.dumps(query_string), headers=headers)
+        jstr = response.text
+        print jstr
+        if (jstr['message'] == 'success'):
+            print jstr['message']
+            question_id = id
+            print question_id
+
+            content = jstr['data']['answers']
+            print content
+            answer_model = AnswerModel(content=content)
+            answer_model.author = 'robot'
+            answer_model.question = question_model
+            db.session.add(answer_model)
+            db.session.commit()
+
+
 @app.route('/d/<id>/')
 def detail(id):
     question_model = QuestionModel.query.get(id)
+    # add aotubot
+    # autoRobotAnswer(id, question_model)
+    url = "http://47.104.98.154:8080/anonymous/wordManage/wenda"
+    headers = {'content-type': "application/json"}
+    query_string = {"question": question_model.title, "robotid": "1791"}
+
+    if (len(question_model.answers) < 1):
+        user = flask.g.user
+        response = requests.post(url, data=json.dumps(query_string), headers=headers)
+        jstr = response.json()
+        print jstr
+        if (jstr['message'] == 'success'):
+            print jstr['message']
+            content = jstr['data']['answers']
+            answer_model = AnswerModel(content=content)
+            answer_model.author = user
+            answer_model.question = QuestionModel.query.get(id)
+            db.session.add(answer_model)
+            db.session.commit()
+
+    # end autobot
     return flask.render_template('detail.html',question=question_model)
 
 @app.route('/comment/',methods=['POST'])

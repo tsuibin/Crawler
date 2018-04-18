@@ -11,7 +11,7 @@
         {% for question in questions %}
               <li>
                 <div class="side-question">
-                    <img class="side-question-avatar" src="{{ url_for('static',filename="images/zhiliao.png") }}" alt="">
+                    <img class="side-question-avatar" src="{{ url_for('static',filename="images/logo_100x100.png") }}" alt="">
                 </div>
                 <div class="question-main">
                     <p class="question-title"><a href="{{ url_for('detail',id=question.id) }}">{{ question.title }}</a></p>
